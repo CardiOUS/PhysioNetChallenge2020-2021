@@ -109,7 +109,7 @@ def training_code(data_directory, model_directory):
         print('Training model for {}-lead set: {}...'.format(len(leads), ', '.join(leads)))
         num_leads = len(leads) # Number of leads.
         batchsize = 30 # Set batch size.
-        epochs = 10 # Set number of epochs.
+        epochs = 15 # Set number of epochs.
         print(f"num labels = {labels.shape[1]}")
 
         if num_leads == 2:
@@ -414,47 +414,47 @@ def inception_model_f1(num_leads, num_labels):
 def scheduler_2(epoch, lr):
     if epoch == 3:
         return lr * 0.1
-    elif epoch == 5:
+    elif epoch == 6:
         return lr * 0.1
-    elif epoch == 7:
+    elif epoch == 8:
         return lr * 0.1
-    elif epoch == 9:
+    elif epoch == 10:
+        return lr * 0.1
+    elif epoch == 12:
+        return lr * 0.1
+    elif epoch == 14:
         return lr * 0.1
     else:
         return lr
 
 def scheduler_3(epoch, lr):
-    if epoch == 3:
+    if epoch == 9:
         return lr * 0.1
-    elif epoch == 5:
-        return lr * 0.1
-    elif epoch == 7:
-        return lr * 0.1
-    elif epoch == 9:
+    elif epoch == 14:
         return lr * 0.1
     else:
         return lr
 
 def scheduler_4(epoch, lr):
-    if epoch == 3:
+    if epoch == 6:
         return lr * 0.1
-    elif epoch == 5:
+    elif epoch == 12:
         return lr * 0.1
-    elif epoch == 7:
-        return lr * 0.1
-    elif epoch == 9:
+    elif epoch == 14:
         return lr * 0.1
     else:
         return lr
 
 def scheduler_6(epoch, lr):
-    if epoch == 3:
+    if epoch == 5:
         return lr * 0.1
-    elif epoch == 5:
+    elif epoch == 8:
         return lr * 0.1
-    elif epoch == 7:
+    elif epoch == 10:
         return lr * 0.1
-    elif epoch == 9:
+    elif epoch == 12:
+        return lr * 0.1
+    elif epoch == 14:
         return lr * 0.1
     else:
         return lr
@@ -462,11 +462,15 @@ def scheduler_6(epoch, lr):
 def scheduler_12(epoch, lr):
     if epoch == 3:
         return lr * 0.1
-    elif epoch == 5:
+    elif epoch == 6:
         return lr * 0.1
-    elif epoch == 7:
+    elif epoch == 8:
         return lr * 0.1
-    elif epoch == 9:
+    elif epoch == 10:
+        return lr * 0.1
+    elif epoch == 12:
+        return lr * 0.1
+    elif epoch == 14:
         return lr * 0.1
     else:
         return lr
