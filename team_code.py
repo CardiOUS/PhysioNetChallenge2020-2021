@@ -460,15 +460,11 @@ def scheduler_6(epoch, lr):
         return lr
 
 def scheduler_12(epoch, lr):
-    if epoch == 3:
+    if epoch == 5:
         return lr * 0.1
-    elif epoch == 6:
+    elif epoch == 9:
         return lr * 0.1
-    elif epoch == 8:
-        return lr * 0.1
-    elif epoch == 10:
-        return lr * 0.1
-    elif epoch == 12:
+    elif epoch == 11:
         return lr * 0.1
     elif epoch == 14:
         return lr * 0.1
