@@ -61,15 +61,25 @@ def training_code(data_directory, model_directory):
     # Extract the classes from the dataset.
     print('Extracting classes...')
 
+    print(f"Shape of rec files: {len(recording_files)}")
+
     classes = set() # Set of classes.
+    ecg_len = [] # List of ECG lengths.
     for header_file in header_files:
         header = load_header(header_file) # Load the header data from the header file.
+        ecg_len.append(int(get_num_samples(header))/int(get_frequency(header))) # Add the ECG length to the list (in seconds).
         classes |= set(get_labels(header)) # Add the labels to the set of classes.
     if all(is_integer(x) for x in classes):
         classes = sorted(classes, key=lambda x: int(x)) # Sort classes numerically if numbers.
     else:
         classes = sorted(classes) # Sort classes alphanumerically if not numbers.
     num_classes_all = len(classes) # Number of classes.
+    ecg_len = np.asarray(ecg_len) # Convert to numpy array.
+
+    recording_files = only_ten_sec(ecg_len, np.asarray(recording_files)) # Only use recordings with length equal to 10 seconds.
+    num_recordings = len(recording_files) # Update number of recordings.
+
+    print(f"Shape of rec files: {num_recordings}")
 
     with open('classes.txt', 'w') as f:
         for class_ in classes:
@@ -103,6 +113,9 @@ def training_code(data_directory, model_directory):
     labels = labels * 1 # Convert to int.
 
     abbr = abbreviation(scored_classes) # Abbreviate the classes.
+
+    print(f"Shape of rec files: {len(recording_files)}")
+    print(f"Shape of label files: {len(labels)}")
 
     # Train a model for each lead set.
     for leads in lead_sets:
@@ -242,7 +255,7 @@ def finn_diagnoser(labels, abbr, navn):
 
 
 def preprocess_ecg(data, header, num_leads):
-    samp_freq = 100
+    samp_freq = 75
     time = 10
     if num_leads == 12:
         data = data[[0,1,2,3,4,5,6,7,8,9,10,11]]
@@ -268,7 +281,7 @@ def preprocess_ecg(data, header, num_leads):
 
 
 def batch_generator(batch_size, gen_x, gen_y, num_leads, num_classes): 
-    samp_freq = 100
+    samp_freq = 75
     time = 10
     batch_features = np.zeros((batch_size,samp_freq*time, num_leads))
     batch_labels = np.zeros((batch_size,num_classes))
@@ -288,7 +301,7 @@ def generate_y(y_train):
 
 
 def generate_X(X_train_file, num_leads):
-    samp_freq = 100
+    samp_freq = 75
     time = 10
     while True:
         for i in range(len(X_train_file)):
@@ -382,7 +395,7 @@ def inception_block(prev_layer):
     return layer_out
 
 def inception_model_f1(num_leads, num_labels):
-    X_input=tf.keras.layers.Input(shape=(1000,num_leads)) 
+    X_input=tf.keras.layers.Input(shape=(750,num_leads)) 
     
     X = tf.keras.layers.ZeroPadding1D(3)(X_input)
     
@@ -470,3 +483,8 @@ def scheduler_12(epoch, lr):
         return lr * 0.1
     else:
         return lr
+
+def only_ten_sec(ecg_len, filename):
+    idx = np.where(ecg_len == 10)[0]
+    filename = filename[idx]
+    return filename
