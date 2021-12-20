@@ -164,10 +164,6 @@ def training_code(data_directory, model_directory):
 def run_model(model, header, recording):
     num_leads = model.input_shape[2]
 
-    #temp_classes = []
-    #with open('./classes.txt', 'r') as f:
-    #    for line in f: # Read in the classes.
-    #        temp_classes.append(line) # Add the class to the scored classes.
     classes = np.asarray(model.layers[0]._name)   
     
     probabilities = np.zeros(len(classes)) # Make empty array for probabilities of classes.
