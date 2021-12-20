@@ -148,9 +148,11 @@ def training_code(data_directory, model_directory):
         # Save model.
         print('Saving model...')
         #model.save("model.h5")
-        name = str(num_leads) + "_lead_model.h5"
-        model_name = model_directory + "/" + name
-        model.save_weights(model_name)
+        # Save the model.
+        save_model(model_directory, leads, classes, model)
+        #name = str(num_leads) + "_lead_model.h5"
+        #model_name = model_directory + "/" + name
+        #model.save_weights(model_name)
 
 
 
@@ -162,7 +164,13 @@ def training_code(data_directory, model_directory):
 
 # Run your trained model. This function is *required*. You should edit this function to add your code, but do *not* change the arguments of this function.
 def run_model(model, header, recording):
-    num_leads = model.input_shape[2]
+    classes = model['classes']
+    leads = model['leads']
+    classifier = model['classifier']
+
+    #num_leads = model.input_shape[2]
+
+    num_leads = len(leads)
 
     temp_classes = []
     with open('classes.txt', 'r') as f:
@@ -176,7 +184,7 @@ def run_model(model, header, recording):
 
     preprocessed_ecg = preprocess_ecg(recording, header, num_leads) # Preprocess the ECG recording.
 
-    probabilities = model.predict(np.expand_dims(preprocessed_ecg,0)) # Predict probabilities for each class.
+    probabilities = classifier.predict(np.expand_dims(preprocessed_ecg,0)) # Predict probabilities for each class.
 
 
     threshold = np.ones(len(classes))*0.5 # Threshold for the model.
@@ -192,10 +200,16 @@ def run_model(model, header, recording):
 #
 ################################################################################
 
+def save_model(model_directory, leads, classes, classifier):
+    d = {'leads': leads, 'classes': classes, 'classifier': classifier}
+    filename = os.path.join(model_directory, get_model_filename(leads))
+    joblib.dump(d, filename, protocol=0)
+
 # Load a trained model. This function is *required*. You should edit this function to add your code, but do *not* change the arguments of this function.
+'''
 def load_model(model_directory, leads):
     temp_classes = []
-    with open('classes.txt', 'r') as f:
+    with open(os.path.join(model_directory, 'classes.txt'), 'r') as f:
         for line in f: # Read in the classes.
             temp_classes.append(line) # Add the class to the scored classes.
     num_classes = len(temp_classes)
@@ -205,6 +219,11 @@ def load_model(model_directory, leads):
     #model = tf.keras.models.load_model(os.path.join(model_directory, model_name))
     model.load_weights(os.path.join(model_directory, model_name))
     return model
+'''
+# Load a trained model. This function is *required*. You should edit this function to add your code, but do *not* change the arguments of this function.
+def load_model(model_directory, leads):
+    filename = os.path.join(model_directory, get_model_filename(leads))
+    return joblib.load(filename)
 
 # Define the filename(s) for the trained models. This function is not required. You can change or remove it.
 def get_model_filename(leads):
