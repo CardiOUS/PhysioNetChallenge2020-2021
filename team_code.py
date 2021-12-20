@@ -81,7 +81,7 @@ def training_code(data_directory, model_directory):
 
     print(f"Shape of rec files: {num_recordings}")
 
-    with open('classes.txt', 'w') as f:
+    with open(os.path.join(model_directory,"classes.txt"), 'w') as f:
         for class_ in classes:
             f.write("%s\n" % class_)
     f.close()
@@ -149,7 +149,7 @@ def training_code(data_directory, model_directory):
         print('Saving model...')
         #model.save("model.h5")
         name = str(num_leads) + "_lead_model.h5"
-        model_name = model_directory + "/" + name
+        model_name = os.path.join(model_directory, name)
         model.save_weights(model_name)
 
 
@@ -164,14 +164,12 @@ def training_code(data_directory, model_directory):
 def run_model(model, header, recording):
     num_leads = model.input_shape[2]
 
-    temp_classes = []
-    with open('classes.txt', 'r') as f:
-        for line in f: # Read in the classes.
-            temp_classes.append(line) # Add the class to the scored classes.
-        
-
-    classes=[s.strip('\n') for s in temp_classes] # Remove newline characters from the end of each string.
-
+    #temp_classes = []
+    #with open('./classes.txt', 'r') as f:
+    #    for line in f: # Read in the classes.
+    #        temp_classes.append(line) # Add the class to the scored classes.
+    classes = np.asarray(model.layers[0]._name)   
+    
     probabilities = np.zeros(len(classes)) # Make empty array for probabilities of classes.
 
     preprocessed_ecg = preprocess_ecg(recording, header, num_leads) # Preprocess the ECG recording.
@@ -195,12 +193,16 @@ def run_model(model, header, recording):
 # Load a trained model. This function is *required*. You should edit this function to add your code, but do *not* change the arguments of this function.
 def load_model(model_directory, leads):
     temp_classes = []
-    with open('classes.txt', 'r') as f:
+    with open(os.path.join(model_directory,"classes.txt"), 'r') as f:
         for line in f: # Read in the classes.
             temp_classes.append(line) # Add the class to the scored classes.
-    num_classes = len(temp_classes)
+    
+
+    classes=[s.strip('\n') for s in temp_classes]
+    num_classes = len(classes)
 
     model = inception_model_f1(len(leads),num_classes) # Create the model.
+    model.layers[0]._name = classes
     model_name = str(len(leads)) + "_lead_model.h5"
     #model = tf.keras.models.load_model(os.path.join(model_directory, model_name))
     model.load_weights(os.path.join(model_directory, model_name))
